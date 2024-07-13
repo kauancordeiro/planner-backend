@@ -1,12 +1,17 @@
 package dev.cordeiro.Planner.trip;
 
+import dev.cordeiro.Planner.participant.ParticipantCreateResponse;
+import dev.cordeiro.Planner.participant.ParticipantRequestPayload;
 import dev.cordeiro.Planner.participant.ParticipantService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,7 +31,7 @@ public class TripController {
 
         Trip newTrip = new Trip(payload);
         this.tripRepository.save(newTrip);
-        this.participantService.registerParticipantToEvent(payload.emails_to_invite(),newTrip);
+        this.participantService.registerParticipantToEvents(payload.emails_to_invite(),newTrip);
         return ResponseEntity.ok(new TripCreateResponse(newTrip.getId()));
     }
 
@@ -70,6 +75,21 @@ public class TripController {
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/{id}/invite")
+    public ResponseEntity<ParticipantCreateResponse> inviteParticipant(@PathVariable UUID id, @RequestBody ParticipantRequestPayload payload){
+        Optional<Trip> trip = this.tripRepository.findById(id);
+        if(trip.isPresent()){
+            Trip rawTrip = trip.get();
+
+            ParticipantCreateResponse participantCreateResponse = this.participantService.registerParticipantToEvent(payload.email(), rawTrip);
+
+            if(rawTrip.getIsConfirmed()) this.participantService.triggerConfirmationEmailToParticipant(payload.email());
+            return ResponseEntity.ok(participantCreateResponse);
+        }
+        return ResponseEntity.notFound().build();
+
     }
 
 
