@@ -1,8 +1,6 @@
 package dev.cordeiro.Planner.trip;
 
-import dev.cordeiro.Planner.participant.ParticipantCreateResponse;
-import dev.cordeiro.Planner.participant.ParticipantRequestPayload;
-import dev.cordeiro.Planner.participant.ParticipantService;
+import dev.cordeiro.Planner.participant.*;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -89,6 +87,14 @@ public class TripController {
             return ResponseEntity.ok(participantCreateResponse);
         }
         return ResponseEntity.notFound().build();
+
+    }
+
+    @GetMapping("/{id}/participants")
+    public ResponseEntity<List<ParticipantData>> getAllParticipants(@PathVariable UUID id){
+        List<ParticipantData> participantList = this.participantService.getALlParticipantsFromEvent(id);
+
+        return ResponseEntity.ok(participantList);
 
     }
 
