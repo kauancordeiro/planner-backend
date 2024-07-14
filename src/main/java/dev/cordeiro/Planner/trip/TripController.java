@@ -1,5 +1,6 @@
 package dev.cordeiro.Planner.trip;
 
+import dev.cordeiro.Planner.activities.ActivityData;
 import dev.cordeiro.Planner.activities.ActivityRequestPayload;
 import dev.cordeiro.Planner.activities.ActivityResponse;
 import dev.cordeiro.Planner.activities.ActivityService;
@@ -114,6 +115,13 @@ public class TripController {
            return ResponseEntity.ok(activityResponse);
         }
         return ResponseEntity.notFound().build();
+
+    }
+    @GetMapping("/{id}/activities")
+    public ResponseEntity<List<ActivityData>> getAllActivities(@PathVariable UUID id){
+
+        List<ActivityData> activityList = this.activityService.getAllActivitiesFromTrip(id);
+        return ResponseEntity.ok(activityList);
 
     }
 
