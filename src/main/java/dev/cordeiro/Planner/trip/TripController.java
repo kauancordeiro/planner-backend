@@ -4,6 +4,9 @@ import dev.cordeiro.Planner.activities.ActivityData;
 import dev.cordeiro.Planner.activities.ActivityRequestPayload;
 import dev.cordeiro.Planner.activities.ActivityResponse;
 import dev.cordeiro.Planner.activities.ActivityService;
+import dev.cordeiro.Planner.link.LinkRequestPayload;
+import dev.cordeiro.Planner.link.LinkResponse;
+import dev.cordeiro.Planner.link.LinkService;
 import dev.cordeiro.Planner.participant.*;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,9 @@ public class TripController {
 
     @Autowired
     private ActivityService activityService;
+
+    @Autowired
+    private LinkService linkService;
 
     @PostMapping
     public ResponseEntity<TripCreateResponse> createTrip(@RequestBody TripRequestPayload payload){
@@ -81,6 +87,8 @@ public class TripController {
         return ResponseEntity.notFound().build();
     }
 
+    // Participants Endpoints
+
     @PostMapping("/{id}/invite")
     public ResponseEntity<ParticipantCreateResponse> inviteParticipant(@PathVariable UUID id, @RequestBody ParticipantRequestPayload payload){
         Optional<Trip> trip = this.tripRepository.findById(id);
@@ -104,6 +112,8 @@ public class TripController {
 
     }
 
+    // Activities Endpoints
+
     @PostMapping("/{id}/activities")
     public ResponseEntity<ActivityResponse> registerActivity(@PathVariable UUID id, @RequestBody ActivityRequestPayload payload){
         Optional<Trip> trip = this.tripRepository.findById(id);
@@ -122,6 +132,23 @@ public class TripController {
 
         List<ActivityData> activityList = this.activityService.getAllActivitiesFromTrip(id);
         return ResponseEntity.ok(activityList);
+
+    }
+
+    // Links Endpoints
+
+    @PostMapping("/{id}/links")
+    public ResponseEntity<LinkResponse> registerLink(@PathVariable UUID id, @RequestBody LinkRequestPayload payload){
+        Optional<Trip> trip = this.tripRepository.findById(id);
+        if(trip.isPresent()){
+
+            Trip rawTrip = trip.get();
+
+            LinkResponse linkResponse = this.linkService.registerLink(payload, rawTrip);
+
+            return ResponseEntity.ok(linkResponse);
+        }
+        return ResponseEntity.notFound().build();
 
     }
 
