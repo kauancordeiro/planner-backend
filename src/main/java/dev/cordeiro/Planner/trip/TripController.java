@@ -1,5 +1,8 @@
 package dev.cordeiro.Planner.trip;
 
+import dev.cordeiro.Planner.activities.ActivityRequestPayload;
+import dev.cordeiro.Planner.activities.ActivityResponse;
+import dev.cordeiro.Planner.activities.ActivityService;
 import dev.cordeiro.Planner.participant.*;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,8 @@ public class TripController {
     @Autowired
     private TripRepository tripRepository;
 
+    @Autowired
+    private ActivityService activityService;
 
     @PostMapping
     public ResponseEntity<TripCreateResponse> createTrip(@RequestBody TripRequestPayload payload){
@@ -95,6 +100,20 @@ public class TripController {
         List<ParticipantData> participantList = this.participantService.getALlParticipantsFromEvent(id);
 
         return ResponseEntity.ok(participantList);
+
+    }
+
+    @PostMapping("/{id}/activities")
+    public ResponseEntity<ActivityResponse> registerActivity(@PathVariable UUID id, @RequestBody ActivityRequestPayload payload){
+        Optional<Trip> trip = this.tripRepository.findById(id);
+        if(trip.isPresent()){
+            Trip rawTrip = trip.get();
+
+            ActivityResponse activityResponse = this.activityService.registerActivity(payload, rawTrip);
+
+           return ResponseEntity.ok(activityResponse);
+        }
+        return ResponseEntity.notFound().build();
 
     }
 
